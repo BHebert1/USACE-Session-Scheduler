@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Session Scheduler</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h1 { color: #2c3e50; }
+    form, table { margin-bottom: 20px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background-color: #f4f4f4; }
+    button { background-color: #5cb85c; color: white; border: none; padding: 10px; cursor: pointer; }
+    button.delete-btn { background-color: #d9534f; }
+  </style>
+</head>
+<body>
+  <h1>Schedule Your 30-Minute Session</h1>
+  <form id="sessionForm">
+    <label for="name">Name:</label><br>
+    <input type="text" id="name" name="name" required><br><br>
+    <label for="email">Email:</label><br>
+    <input type="email" id="email" name="email" required><br><br>
+    <label for="time">Preferred Date & Time:</label><br>
+    <input type="datetime-local" id="time" name="time" required><br><br>
+    <button type="submit">Submit</button>
+  </form>
+  
+  <h2>Registered Sessions</h2>
+  <table id="sessionTable">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Date & Time</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Rows will be dynamically added here -->
+    </tbody>
+  </table>
+
+  <script>
+    const form = document.getElementById('sessionForm');
+    const table = document.getElementById('sessionTable').getElementsByTagName('tbody')[0];
+
+    // Load sessions from localStorage
+    function loadSessions() {
+      const sessions = JSON.parse(localStorage.getItem('sessions')) || [];
+      table.innerHTML = ''; // Clear existing rows
+
+      sessions.forEach((session, index) => {
+        const row = table.insertRow();
+        row.insertCell(0).innerText = session.name;
+        row.insertCell(1).innerText = session.email;
+        row.insertCell(2).innerText = new Date(session.time).toLocaleString();
+        
+        const actionsCell = row.insertCell(3);
+        const deleteBtn = document.createElement('button');
+        deleteBtn.innerText = 'Delete';
+        deleteBtn.className = 'delete-btn';
+        deleteBtn.onclick = () => deleteSession(index);
+        actionsCell.appendChild(deleteBtn);
+      });
+    }
+
+    // Save a new session
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+
+      const name = document.getElementById('name').value;
+      const email = document.getElementById('email').value;
+      const time = document.getElementById('time').value;
+
+      const sessions = JSON.parse(localStorage.getItem('sessions')) || [];
+      sessions.push({ name, email, time });
+      localStorage.setItem('sessions', JSON.stringify(sessions));
+
+      form.reset(); // Clear the form
+      loadSessions(); // Reload the table
+    });
+
+    // Delete a session
+    function deleteSession(index) {
+      const sessions = JSON.parse(localStorage.getItem('sessions')) || [];
+      sessions.splice(index, 1); // Remove session at the given index
+      localStorage.setItem('sessions', JSON.stringify(sessions));
+      loadSessions(); // Reload the table
+    }
+
+    // Initialize
+    loadSessions();
+  </script>
+</body>
+</html>
+Added index.html
