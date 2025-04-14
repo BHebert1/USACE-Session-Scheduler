@@ -3,96 +3,71 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Session Scheduler</title>
+  <title>Schedule Your Session</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    h1 { color: #2c3e50; }
-    form, table { margin-bottom: 20px; }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-    th { background-color: #f4f4f4; }
-    button { background-color: #5cb85c; color: white; border: none; padding: 10px; cursor: pointer; }
-    button.delete-btn { background-color: #d9534f; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    form {
+      max-width: 300px;
+      margin: auto;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:disabled {
+      background-color: #ccc;
+    }
   </style>
 </head>
 <body>
-  <h1>Schedule Your 30-Minute Session</h1>
+  <h1>Schedule Your Session</h1>
   <form id="sessionForm">
-    <label for="name">Name:</label><br>
-    <input type="text" id="name" name="name" required><br><br>
-    <label for="email">Email:</label><br>
-    <input type="email" id="email" name="email" required><br><br>
-    <label for="time">Preferred Date & Time:</label><br>
-    <input type="datetime-local" id="time" name="time" required><br><br>
+    <label for="name">Your Name:</label>
+    <input type="text" id="name" name="name" required>
+
+    <label for="time">Select Time:</label>
+    <input type="datetime-local" id="time" name="time" required>
+
     <button type="submit">Submit</button>
   </form>
-  
-  <h2>Registered Sessions</h2>
-  <table id="sessionTable">
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Email</th>
-        <th>Date & Time</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <!-- Rows will be dynamically added here -->
-    </tbody>
-  </table>
 
   <script>
-    const form = document.getElementById('sessionForm');
-    const table = document.getElementById('sessionTable').getElementsByTagName('tbody')[0];
-
-    // Load sessions from localStorage
-    function loadSessions() {
-      const sessions = JSON.parse(localStorage.getItem('sessions')) || [];
-      table.innerHTML = ''; // Clear existing rows
-
-      sessions.forEach((session, index) => {
-        const row = table.insertRow();
-        row.insertCell(0).innerText = session.name;
-        row.insertCell(1).innerText = session.email;
-        row.insertCell(2).innerText = new Date(session.time).toLocaleString();
-        
-        const actionsCell = row.insertCell(3);
-        const deleteBtn = document.createElement('button');
-        deleteBtn.innerText = 'Delete';
-        deleteBtn.className = 'delete-btn';
-        deleteBtn.onclick = () => deleteSession(index);
-        actionsCell.appendChild(deleteBtn);
-      });
-    }
-
-    // Save a new session
-    form.addEventListener('submit', (event) => {
-      event.preventDefault();
-
-      const name = document.getElementById('name').value;
-      const email = document.getElementById('email').value;
-      const time = document.getElementById('time').value;
-
-      const sessions = JSON.parse(localStorage.getItem('sessions')) || [];
-      sessions.push({ name, email, time });
-      localStorage.setItem('sessions', JSON.stringify(sessions));
-
-      form.reset(); // Clear the form
-      loadSessions(); // Reload the table
+    document.getElementById('sessionForm').addEventListener('submit', function(event) {
+      event.preventDefault(); // Prevent form submission
+      
+      // Get the selected date and time
+      const selectedTime = new Date(document.getElementById('time').value);
+      
+      // Define the valid time range
+      const startTime = new Date('2025-04-22T10:00:00');
+      const endTime = new Date('2025-04-22T14:00:00');
+      
+      // Check if the selected time is within the range
+      if (selectedTime >= startTime && selectedTime <= endTime) {
+        alert('Thank you! Your session has been scheduled.');
+        // You can submit the form data here using fetch() or another method
+      } else {
+        alert('The selected time is outside the allowed range (April 22, 2025, 10:00 AM to 2:00 PM). Please pick a valid time.');
+      }
     });
-
-    // Delete a session
-    function deleteSession(index) {
-      const sessions = JSON.parse(localStorage.getItem('sessions')) || [];
-      sessions.splice(index, 1); // Remove session at the given index
-      localStorage.setItem('sessions', JSON.stringify(sessions));
-      loadSessions(); // Reload the table
-    }
-
-    // Initialize
-    loadSessions();
   </script>
 </body>
 </html>
-Added index.html
