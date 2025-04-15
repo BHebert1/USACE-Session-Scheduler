@@ -43,6 +43,10 @@
     button:disabled {
       background-color: #ccc;
     }
+    .totals {
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -57,6 +61,12 @@
       </select>
       <button type="submit">Submit</button>
     </form>
+
+    <div class="totals">
+      <p>Total Booked: <span id="totalBooked">0</span></p>
+      <p>Available Slots: <span id="totalAvailable">0</span></p>
+    </div>
+
     <h2>Scheduled Sessions</h2>
     <table>
       <thead>
@@ -76,6 +86,8 @@
     const nameInput = document.getElementById("name");
     const timeSelect = document.getElementById("time");
     const scheduledSessionsTable = document.getElementById("scheduledSessions");
+    const totalBookedSpan = document.getElementById("totalBooked");
+    const totalAvailableSpan = document.getElementById("totalAvailable");
 
     // Define the allowed time range
     const startTime = new Date("2025-04-22T10:00:00");
@@ -109,6 +121,7 @@
         option.disabled = true;
         timeSelect.appendChild(option);
       }
+      updateTotals();
     }
 
     // Update the scheduled sessions table
@@ -124,6 +137,14 @@
         row.appendChild(timeCell);
         scheduledSessionsTable.appendChild(row);
       });
+    }
+
+    // Update running totals
+    function updateTotals() {
+      const totalBooked = bookedSessions.length;
+      const totalAvailable = timeSlots.length - totalBooked;
+      totalBookedSpan.textContent = totalBooked;
+      totalAvailableSpan.textContent = totalAvailable;
     }
 
     // Handle form submission
