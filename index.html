@@ -8,21 +8,29 @@
     body {
       font-family: Arial, sans-serif;
       margin: 20px;
+      line-height: 1.6;
     }
-    form {
-      max-width: 300px;
+    .container {
+      max-width: 600px;
       margin: auto;
     }
-    label {
-      display: block;
-      margin-bottom: 8px;
-    }
-    input {
+    table {
       width: 100%;
-      padding: 8px;
-      margin-bottom: 16px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    table, th, td {
+      border: 1px solid #ddd;
+    }
+    th, td {
+      padding: 10px;
+      text-align: center;
+    }
+    .available {
+      color: green;
+    }
+    .booked {
+      color: red;
     }
     button {
       padding: 10px 20px;
@@ -38,36 +46,105 @@
   </style>
 </head>
 <body>
-  <h1>Schedule Your Session</h1>
-  <form id="sessionForm">
-    <label for="name">Your Name:</label>
-    <input type="text" id="name" name="name" required>
-
-    <label for="time">Select Time:</label>
-    <input type="datetime-local" id="time" name="time" required>
-
-    <button type="submit">Submit</button>
-  </form>
+  <div class="container">
+    <h1>Schedule Your 30-Minute Session</h1>
+    <form id="sessionForm">
+      <label for="name">Your Name:</label>
+      <input type="text" id="name" required>
+      <label for="time">Select a Time:</label>
+      <select id="time">
+        <!-- Available times will be populated dynamically -->
+      </select>
+      <button type="submit">Submit</button>
+    </form>
+    <h2>Scheduled Sessions</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Time</th>
+        </tr>
+      </thead>
+      <tbody id="scheduledSessions">
+        <!-- Scheduled sessions will appear here -->
+      </tbody>
+    </table>
+  </div>
 
   <script>
-    document.getElementById('sessionForm').addEventListener('submit', function(event) {
-      event.preventDefault(); // Prevent form submission
-      
-      // Get the selected date and time
-      const selectedTime = new Date(document.getElementById('time').value);
-      
-      // Define the valid time range
-      const startTime = new Date('2025-04-22T10:00:00');
-      const endTime = new Date('2025-04-22T14:00:00');
-      
-      // Check if the selected time is within the range
-      if (selectedTime >= startTime && selectedTime <= endTime) {
-        alert('Thank you! Your session has been scheduled.');
-        // You can submit the form data here using fetch() or another method
+    const form = document.getElementById("sessionForm");
+    const nameInput = document.getElementById("name");
+    const timeSelect = document.getElementById("time");
+    const scheduledSessionsTable = document.getElementById("scheduledSessions");
+
+    // Define the allowed time range
+    const startTime = new Date("2025-04-22T10:00:00");
+    const endTime = new Date("2025-04-22T14:00:00");
+
+    // Create time slots in 30-minute intervals
+    const timeSlots = [];
+    let currentTime = new Date(startTime);
+    while (currentTime < endTime) {
+      timeSlots.push(new Date(currentTime));
+      currentTime.setMinutes(currentTime.getMinutes() + 30);
+    }
+
+    // Store booked sessions
+    const bookedSessions = [];
+
+    // Populate available times
+    function updateAvailableTimes() {
+      timeSelect.innerHTML = ""; // Clear existing options
+      timeSlots.forEach((slot) => {
+        if (!bookedSessions.some((session) => session.time.getTime() === slot.getTime())) {
+          const option = document.createElement("option");
+          option.value = slot.toISOString();
+          option.textContent = slot.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+          timeSelect.appendChild(option);
+        }
+      });
+      if (timeSelect.options.length === 0) {
+        const option = document.createElement("option");
+        option.textContent = "No available times";
+        option.disabled = true;
+        timeSelect.appendChild(option);
+      }
+    }
+
+    // Update the scheduled sessions table
+    function updateScheduledSessions() {
+      scheduledSessionsTable.innerHTML = ""; // Clear existing rows
+      bookedSessions.forEach((session) => {
+        const row = document.createElement("tr");
+        const nameCell = document.createElement("td");
+        const timeCell = document.createElement("td");
+        nameCell.textContent = session.name;
+        timeCell.textContent = session.time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+        row.appendChild(nameCell);
+        row.appendChild(timeCell);
+        scheduledSessionsTable.appendChild(row);
+      });
+    }
+
+    // Handle form submission
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const name = nameInput.value.trim();
+      const selectedTime = new Date(timeSelect.value);
+
+      if (name && selectedTime) {
+        bookedSessions.push({ name, time: selectedTime });
+        updateAvailableTimes();
+        updateScheduledSessions();
+        form.reset();
+        alert("Session booked successfully!");
       } else {
-        alert('The selected time is outside the allowed range (April 22, 2025, 10:00 AM to 2:00 PM). Please pick a valid time.');
+        alert("Please fill in all fields.");
       }
     });
+
+    // Initialize
+    updateAvailableTimes();
   </script>
 </body>
 </html>
